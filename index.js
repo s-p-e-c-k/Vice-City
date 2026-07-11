@@ -17835,7 +17835,9 @@ var _eglCreateContext = (display, config, hmm, contextAttribs) => {
     GL.makeContextCurrent(EGL.context);
     Browser.useWebGL = true;
     Browser.moduleContextCreatedCallbacks.forEach((callback) => callback());
-    GL.makeContextCurrent(null);
+    // reVC queries GL capabilities immediately after eglCreateContext and
+    // before its first eglMakeCurrent call. Keep this context current so
+    // GL.currentContext and GLctx remain valid for that first query.
     return 62004;
   } else {
     EGL.setErrorCode(12297);

@@ -15,11 +15,12 @@
     gameWindow.document.close();
     button.disabled=true; status.textContent='Building the clean game tab…';
     try {
-      const response=await fetch(new URL('game.html',CDN),{cache:'no-store'});
+      const response=await fetch(new URL('game.html?build=20260710-5',CDN),{cache:'no-store'});
       if(!response.ok) throw new Error(`Game page returned HTTP ${response.status}`);
       const html=await response.text();
       if(!html.toLowerCase().includes('<!doctype html')) throw new Error('The CDN returned an invalid game page.');
       gameWindow.document.open(); gameWindow.document.write(html); gameWindow.document.close(); gameWindow.focus();
+      try { gameWindow.opener=null; } catch (_) {}
       status.textContent='Vice City opened in a new tab.';
     } catch(error) {
       gameWindow.document.body.innerHTML=`<main style="max-width:620px;margin:15vh auto;padding:24px;color:white;font:16px system-ui"><h1>Vice City could not open</h1><p>${String(error.message).replace(/[<>&]/g,'')}</p><p>Refresh the launcher after the latest repository update reaches jsDelivr.</p></main>`;

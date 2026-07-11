@@ -2,7 +2,7 @@
   'use strict';
 
   const REPO_BASE = 'https://cdn.jsdelivr.net/gh/StaticQuasar931/Vice-City@main/';
-  const CACHE_NAME = 'vice-city-staticquasar931-v4';
+  const CACHE_NAME = 'vice-city-staticquasar931-v5';
   const DB_NAME = CACHE_NAME;
   const STORE_NAME = 'files';
   const MANIFEST = [
@@ -123,7 +123,15 @@
     ['https://www.instagram.com/freeschoolgamepage/',new URL('assets/launcher/instagram.png',REPO_BASE).href,'Instagram']
   ]; let rotateIndex=0; const rotate=()=>{const [href,src,alt]=rotator[rotateIndex++%rotator.length];document.querySelector('#staticSlideLink').href=href;const img=document.querySelector('#staticSlideImg');img.src=src;img.alt=alt;}; rotate(); setInterval(rotate,8000);
   document.querySelectorAll('.activity-tabs button').forEach(button=>button.onclick=()=>{document.querySelectorAll('.activity-tabs button,.activity-panel').forEach(node=>node.classList.remove('active'));button.classList.add('active');document.querySelector(`#${button.dataset.panel}`).classList.add('active');});
-  document.querySelectorAll('#triviaAnswers button').forEach(button=>button.onclick=()=>{document.querySelectorAll('#triviaAnswers button').forEach(answer=>answer.disabled=true);const correct=button.dataset.correct==='true';button.classList.add(correct?'correct':'wrong');if(!correct)document.querySelector('#triviaAnswers [data-correct="true"]').classList.add('correct');document.querySelector('#triviaResult').textContent=correct?'Correct. Neon, pastel suits, and 1980s excess.':'Not quite. Vice City is inspired by the 1980s.';});
+  const questions=[
+    {q:'Which decade inspires Vice City?',a:['The 1980s','The 1960s','The 2000s'],c:0,f:'Neon, pastel suits, and 1980s excess.'},
+    {q:'What is the playable protagonist called?',a:['Tommy Vercetti','Claude Speed','Carl Johnson'],c:0,f:'Tommy arrives in Vice City after fifteen years in prison.'},
+    {q:'Which real city inspired Vice City?',a:['Miami','Las Vegas','New Orleans'],c:0,f:'Vice City borrows its beaches, palms, and neon from Miami.'},
+    {q:'Which station plays new wave music?',a:['Wave 103','K-Chat','VCPR'],c:0,f:'Wave 103 is the city’s new wave station.'},
+    {q:'What color is central to the classic Vice City logo?',a:['Pink','Green','Orange'],c:0,f:'Its pink script became one of the game’s signatures.'}
+  ]; let questionIndex=0,score=0;
+  function showQuestion(){const item=questions[questionIndex%questions.length];document.querySelector('#triviaQuestion').textContent=item.q;document.querySelector('#triviaResult').textContent='';const box=document.querySelector('#triviaAnswers');box.innerHTML='';item.a.forEach((answer,index)=>{const button=document.createElement('button');button.textContent=answer;button.onclick=()=>{[...box.children].forEach(child=>child.disabled=true);const correct=index===item.c;button.classList.add(correct?'correct':'wrong');box.children[item.c].classList.add('correct');if(correct){score++;document.querySelector('#triviaScore').textContent=score;}document.querySelector('#triviaResult').textContent=(correct?'Correct. ':'Not quite. ')+item.f;setTimeout(()=>{questionIndex++;showQuestion();},2600);};box.appendChild(button);});} showQuestion();
+  const slides=[...document.querySelectorAll('.load-slide')],rails=[...document.querySelectorAll('.slide-rail i')];let slideIndex=0;setInterval(()=>{slides[slideIndex].classList.remove('active');rails[slideIndex].classList.remove('active');slideIndex=(slideIndex+1)%slides.length;slides[slideIndex].classList.add('active');rails[slideIndex].classList.add('active');},7200);
   let sequence=''; addEventListener('keydown',event=>{sequence=(sequence+event.key.toLowerCase()).slice(-3);if(sequence==='yui'){document.querySelector('#staticMenu').classList.toggle('menu-hidden');document.querySelector('#staticSlideMenu').classList.toggle('menu-hidden');sequence='';}});
   addEventListener('beforeunload',()=>{for(const url of blobUrls.values()) URL.revokeObjectURL(url);});
   start();

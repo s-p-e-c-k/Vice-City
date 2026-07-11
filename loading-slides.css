@@ -1,0 +1,8 @@
+#gameBackdrop{overflow:hidden;background:#090316}
+#gameBackdrop .load-slide{position:absolute;inset:-4%;width:108%;height:108%;object-fit:cover;opacity:0;filter:saturate(1.08) contrast(1.03);transform:translateX(8%) scale(1.04);transition:opacity 1.1s ease,transform 8s ease}
+#gameBackdrop .load-slide.active{opacity:1;transform:translateX(-2%) scale(1)}
+#gameBackdrop .load-shade{position:absolute;inset:0;background:linear-gradient(90deg,rgba(9,3,22,.97),rgba(9,3,22,.66) 58%,rgba(9,3,22,.36)),linear-gradient(0deg,rgba(9,3,22,.9),transparent 68%)}
+#gameBackdrop .slide-rail{position:absolute;inset:auto 28px auto auto;top:50%;display:grid;gap:8px;width:auto;height:auto;transform:translateY(-50%);background:none}
+.slide-rail i{display:block;width:4px;height:28px;border-radius:9px;background:rgba(255,255,255,.25);transition:height .3s,background .3s}
+.slide-rail i.active{height:52px;background:#ff4fa3;box-shadow:0 0 16px rgba(255,79,163,.7)}
+.trivia-score{display:flex;justify-content:space-between;margin-top:18px;padding-top:13px;border-top:1px solid rgba(255,255,255,.1);color:#cbbdd4}.trivia-score strong{color:#4fe6ff;font-size:20px}
