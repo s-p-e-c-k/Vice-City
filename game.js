@@ -136,6 +136,10 @@ function setStatus(text) {
 };
 
 async function loadGame(data) {
+    const canvasElement = document.getElementById('canvas');
+    const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+    canvasElement.width = Math.max(640, Math.floor(window.innerWidth * pixelRatio));
+    canvasElement.height = Math.max(360, Math.floor(window.innerHeight * pixelRatio));
     var Module = {
         mainCalled: () => {
             try {
@@ -208,12 +212,24 @@ async function loadGame(data) {
     };
 
     window.Module = Module;
-    const script = document.createElement('script');
-    script.async = true;
-    script.src = 'index.js';
-    document.body.appendChild(script);
-
     document.body.classList.add('gameIsStarted');
+    try {
+        if (typeof window.__loadVerifiedViceCityScript === 'function') {
+            await window.__loadVerifiedViceCityScript('index.js');
+        } else {
+            await new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = 'index.js';
+                script.onload = resolve;
+                script.onerror = () => reject(new Error('Failed to load index.js'));
+                document.body.appendChild(script);
+            });
+        }
+    } catch (error) {
+        Module.setStatus(`Engine error: ${error.message}`);
+        console.error('Vice City engine failed to load:', error);
+        return;
+    }
 
     const emulator = new GamepadEmulator();
     const gamepad = emulator.AddEmulatedGamepad(null, true);

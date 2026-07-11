@@ -2,7 +2,7 @@
   'use strict';
 
   const REPO_BASE = 'https://cdn.jsdelivr.net/gh/StaticQuasar931/Vice-City@main/';
-  const CACHE_NAME = 'vice-city-staticquasar931-v3';
+  const CACHE_NAME = 'vice-city-staticquasar931-v4';
   const DB_NAME = CACHE_NAME;
   const STORE_NAME = 'files';
   const MANIFEST = [
@@ -18,7 +18,8 @@
     ['audio/wild.adf', [20866662,20866662,20866662,3115319]]
   ];
   const SCRIPT_ORDER = ['GamepadEmulator.js', 'idbfs.js', 'game.js'];
-  const totalBytes = MANIFEST.reduce((sum, [, sizes]) => sum + sizes.reduce((a,b) => a+b, 0), 0);
+  const WASM_SIZE = 7625729;
+  const totalBytes = WASM_SIZE + MANIFEST.reduce((sum, [, sizes]) => sum + sizes.reduce((a,b) => a+b, 0), 0);
   const blobUrls = new Map();
   let completedBytes = 0;
   let currentError = '';
@@ -26,7 +27,7 @@
   const ui = {
     loader: document.querySelector('#loader'), fill: document.querySelector('#progressFill'), percent: document.querySelector('#progressPercent'),
     bytes: document.querySelector('#progressBytes'), stage: document.querySelector('#loadingStage'), asset: document.querySelector('#loadingAsset'),
-    panel: document.querySelector('#errorPanel'), message: document.querySelector('#errorMessage')
+    panel: document.querySelector('#errorPanel'), message: document.querySelector('#errorMessage'), play: document.querySelector('#playNowButton')
   };
 
   function formatMB(bytes) { return `${(bytes / 1048576).toFixed(1)} MB`; }
@@ -45,10 +46,10 @@
   async function dbRequest(mode, action) {
     const db = await openDB();
     return new Promise((resolve, reject) => {
-      const tx = db.transaction(STORE_NAME, mode); const result = action(tx.objectStore(STORE_NAME));
-      if (result) { result.onsuccess = () => resolve(result.result); result.onerror = () => reject(result.error); }
-      else { tx.oncomplete = () => resolve(); tx.onerror = () => reject(tx.error); }
-      tx.oncomplete = tx.oncomplete || (() => { db.close(); });
+      const tx = db.transaction(STORE_NAME, mode); const request = action(tx.objectStore(STORE_NAME));
+      tx.oncomplete = () => { const value=request?.result; db.close(); resolve(value); };
+      tx.onerror = () => { db.close(); reject(tx.error); };
+      tx.onabort = () => { db.close(); reject(tx.error || new Error('Browser storage transaction was aborted.')); };
     });
   }
   const readCache = key => dbRequest('readonly', store => store.get(key));
@@ -86,20 +87,43 @@
     const nativeFetch=window.fetch.bind(window); window.fetch=(input,init)=>{ const key=knownAssetPath(input); if(!key) return nativeFetch(input,init); const mapped=blobUrls.get(key); if(input instanceof Request) return nativeFetch(new Request(mapped,input),init); return nativeFetch(mapped,init); };
     const nativeOpen=XMLHttpRequest.prototype.open; XMLHttpRequest.prototype.open=function(method,url,...rest){const key=knownAssetPath(url);return nativeOpen.call(this,method,key?blobUrls.get(key):url,...rest);};
   }
-  function loadScript(path) { return new Promise((resolve,reject)=>{ui.asset.textContent=path;const script=document.createElement('script');script.src=new URL(path,REPO_BASE).href;script.onload=resolve;script.onerror=()=>reject(new Error(`Failed to load ${script.src}`));document.body.appendChild(script);}); }
-  async function clearCache() { for(const url of blobUrls.values()) URL.revokeObjectURL(url); blobUrls.clear(); await new Promise(resolve=>{const req=indexedDB.deleteDatabase(DB_NAME);req.onsuccess=req.onerror=req.onblocked=resolve;}); }
+  async function loadScript(path) {
+    ui.asset.textContent=path;
+    const sourceUrl=new URL(path,REPO_BASE).href;
+    const coreCache=await caches.open(`${CACHE_NAME}-core`);
+    let response=await coreCache.match(sourceUrl);
+    if(!response){response=await fetch(sourceUrl,{cache:'no-cache'});if(response.ok)await coreCache.put(sourceUrl,response.clone());}
+    if(!response.ok) throw new Error(`HTTP ${response.status} while loading ${sourceUrl}`);
+    const source=await response.text();
+    const sample=source.slice(0,300).toLowerCase();
+    if(source.length<500||sample.includes('<!doctype')||sample.includes('<html')||sample.includes("couldn't find the requested file")) throw new Error(`Invalid JavaScript returned for ${sourceUrl}`);
+    const objectUrl=URL.createObjectURL(new Blob([`${source}\n//# sourceURL=${sourceUrl}`],{type:'text/javascript'}));
+    await new Promise((resolve,reject)=>{const script=document.createElement('script');script.src=objectUrl;script.onload=resolve;script.onerror=()=>reject(new Error(`Failed to execute ${sourceUrl}`));document.body.appendChild(script);});
+    URL.revokeObjectURL(objectUrl);
+  }
+  window.__loadVerifiedViceCityScript=loadScript;
+  async function clearCache() { for(const url of blobUrls.values()) URL.revokeObjectURL(url); blobUrls.clear(); await caches.delete(`${CACHE_NAME}-core`); await new Promise(resolve=>{const req=indexedDB.deleteDatabase(DB_NAME);req.onsuccess=req.onerror=req.onblocked=resolve;}); }
   function showError(error) { currentError=`${error?.stack || error}`; console.error('[Vice City loader]',error); ui.panel.hidden=false; ui.message.textContent=error?.message||String(error); ui.stage.textContent='Load failed'; }
-  async function start() { try { ui.panel.hidden=true; completedBytes=0; updateProgress(); for(const [path,sizes] of MANIFEST) await mergeAsset(path,sizes); installRemapping(); ui.stage.textContent='Initializing game engine'; for(const script of SCRIPT_ORDER) await loadScript(script); ui.stage.textContent='Game engine started'; ui.loader.classList.add('loader-complete'); setTimeout(()=>ui.loader.remove(),500); } catch(error){showError(error);} }
+  function verifyWebGL() {
+    const probe=document.createElement('canvas');
+    const gl=probe.getContext('webgl2',{alpha:false,depth:true,stencil:true,antialias:true})||probe.getContext('webgl',{alpha:false,depth:true,stencil:true,antialias:true});
+    if(!gl) throw new Error('WebGL is unavailable. Enable hardware acceleration or try Firefox, then reload.');
+    const extension=gl.getExtension('WEBGL_lose_context'); if(extension) extension.loseContext();
+  }
+  async function start() { try { ui.panel.hidden=true; completedBytes=0; updateProgress(); verifyWebGL(); for(const [path,sizes] of MANIFEST) await mergeAsset(path,sizes); ui.asset.textContent='index.wasm'; const wasm=await fetchPart('index.wasm',WASM_SIZE); blobUrls.set('index.wasm',URL.createObjectURL(new Blob([wasm],{type:'application/wasm'}))); installRemapping(); ui.stage.textContent='Initializing game engine'; for(const script of SCRIPT_ORDER) await loadScript(script); ui.stage.textContent='Ready for your arrival'; ui.asset.textContent='Click Enter Vice City to create the graphics and audio context.'; ui.play.hidden=false; } catch(error){showError(error);} }
 
   document.querySelector('#retryButton').onclick=()=>location.reload();
   document.querySelector('#clearCacheButton').onclick=async()=>{await clearCache();location.reload();};
   document.querySelector('#copyErrorButton').onclick=()=>navigator.clipboard.writeText(currentError).catch(()=>{});
+  ui.play.onclick=()=>{ui.play.disabled=true;ui.play.textContent='Entering Vice City…';requestAnimationFrame(()=>{ui.loader.classList.add('loader-complete');setTimeout(()=>ui.loader.remove(),520);});};
   document.querySelector('#closeStaticMenu').onclick=()=>document.querySelector('#staticMenu').classList.add('menu-hidden');
   const rotator=[
-    ['https://sites.google.com/view/staticquasar931/google-form','https://cdn.jsdelivr.net/gh/StaticQuasar931/Images@main/GoogleForm.png','Google Form'],
-    ['https://discord.gg/DP2hM7RRhR','https://cdn.jsdelivr.net/gh/StaticQuasar931/Images@main/Discord.png','Discord'],
-    ['https://www.instagram.com/freeschoolgamepage/','https://cdn.jsdelivr.net/gh/StaticQuasar931/Images@main/Instagram.png','Instagram']
+    ['https://sites.google.com/view/staticquasar931/google-form',new URL('assets/launcher/google-form.png',REPO_BASE).href,'Google Form'],
+    ['https://discord.gg/DP2hM7RRhR',new URL('assets/launcher/discord.png',REPO_BASE).href,'Discord'],
+    ['https://www.instagram.com/freeschoolgamepage/',new URL('assets/launcher/instagram.png',REPO_BASE).href,'Instagram']
   ]; let rotateIndex=0; const rotate=()=>{const [href,src,alt]=rotator[rotateIndex++%rotator.length];document.querySelector('#staticSlideLink').href=href;const img=document.querySelector('#staticSlideImg');img.src=src;img.alt=alt;}; rotate(); setInterval(rotate,8000);
+  document.querySelectorAll('.activity-tabs button').forEach(button=>button.onclick=()=>{document.querySelectorAll('.activity-tabs button,.activity-panel').forEach(node=>node.classList.remove('active'));button.classList.add('active');document.querySelector(`#${button.dataset.panel}`).classList.add('active');});
+  document.querySelectorAll('#triviaAnswers button').forEach(button=>button.onclick=()=>{document.querySelectorAll('#triviaAnswers button').forEach(answer=>answer.disabled=true);const correct=button.dataset.correct==='true';button.classList.add(correct?'correct':'wrong');if(!correct)document.querySelector('#triviaAnswers [data-correct="true"]').classList.add('correct');document.querySelector('#triviaResult').textContent=correct?'Correct. Neon, pastel suits, and 1980s excess.':'Not quite. Vice City is inspired by the 1980s.';});
   let sequence=''; addEventListener('keydown',event=>{sequence=(sequence+event.key.toLowerCase()).slice(-3);if(sequence==='yui'){document.querySelector('#staticMenu').classList.toggle('menu-hidden');document.querySelector('#staticSlideMenu').classList.toggle('menu-hidden');sequence='';}});
   addEventListener('beforeunload',()=>{for(const url of blobUrls.values()) URL.revokeObjectURL(url);});
   start();

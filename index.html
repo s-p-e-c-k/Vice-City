@@ -2,52 +2,68 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="robots" content="index,follow,max-image-preview:large">
-  <meta name="theme-color" content="#09051b">
+  <meta name="theme-color" content="#160a2c">
   <title>Grand Theft Auto: Vice City Unblocked | StaticQuasar931 Games</title>
-  <meta name="description" content="Play Grand Theft Auto: Vice City unblocked at school, work, and home. Chromebook friendly. Common searches: vicecity, vice cty, GTA Vice City, Grand Theft Auto Vice City game.">
-  <link rel="icon" type="image/png" href="https://cdn.jsdelivr.net/gh/StaticQuasar931/Images@main/icon.png">
-  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/StaticQuasar931/Vice-City@main/style.css">
+  <meta name="description" content="Play Grand Theft Auto: Vice City unblocked at school, work, and home. Chromebook friendly with browser caching for faster return visits. Searches: vicecity, vice cty, GTA Vice City, Grand Theft Auto Vice City game.">
+  <link rel="canonical" href="https://sites.google.com/view/staticquasar931/gm3z/grand-theft-auto-vice-city">
+  <meta property="og:title" content="Grand Theft Auto: Vice City Unblocked | StaticQuasar931 Games">
+  <meta property="og:description" content="Launch GTA Vice City in a clean about:blank tab. Chromebook friendly and cached for faster return visits.">
+  <meta property="og:image" content="https://cdn.jsdelivr.net/gh/StaticQuasar931/Vice-City@main/assets/launcher/vice-city-hero.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="assets/launcher/static-icon.png">
+  <link rel="stylesheet" href="launcher.css">
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-5JZHSM4RCW"></script>
-  <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','G-5JZHSM4RCW');</script>
+  <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','G-5JZHSM4RCW',{cookie_domain:'none',send_page_view:true});</script>
 </head>
-<body data-is-touch="0" data-state-car="0" data-state-car-gun="0" data-state-gun="0" data-state-bike="0" data-state-menu="1" data-state-cutscene="0" data-state-mobring="0" data-state-job="0" data-state-disable-controls="0" data-state-panzer="0" data-state-car-with-weapon="0" data-state-hunter="0" data-state-scope-mode="0" data-state-scope-gun="0">
-  <aside id="staticMenu" aria-label="StaticQuasar menu">
+<body>
+  <div class="backdrop" aria-hidden="true">
+    <img class="backdrop-slide active" src="assets/launcher/vice-city-hero.jpg" alt="">
+    <img class="backdrop-slide" src="assets/launcher/vice-city-cover.jpg" alt="">
+    <img class="backdrop-slide" src="assets/launcher/vice-city-intro.jpg" alt="">
+    <div class="backdrop-shade"></div>
+  </div>
+
+  <nav class="static-nav" aria-label="StaticQuasar931 games">
+    <img src="assets/launcher/static-icon.png" alt="">
     <a href="https://sites.google.com/view/staticquasar931/gm3z" target="_blank" rel="noopener">More Unblocked Games by Static</a>
-    <button id="closeStaticMenu" type="button" aria-label="Hide menu">×</button>
-  </aside>
+  </nav>
 
-  <aside id="staticSlideMenu" aria-live="polite">
-    <a id="staticSlideLink" target="_blank" rel="noopener"><img id="staticSlideImg" alt="StaticQuasar931 link"></a>
-  </aside>
+  <main class="launcher-shell">
+    <section class="hero-card">
+      <div class="hero-copy">
+        <p class="kicker">STATICQUASAR931 PRESENTS</p>
+        <h1>Grand Theft Auto:<br><span>Vice City</span></h1>
+        <p class="lede">The neon-soaked classic, prepared for modern browsers with resumable downloads and a clean game tab.</p>
+        <div class="feature-row" aria-label="Game features">
+          <span>About:blank launch</span><span>Offline-ready cache</span><span>Keyboard + touch</span>
+        </div>
+        <div class="action-row">
+          <button class="launch-button" id="launchButton" type="button"><span>Launch Vice City</span><small>opens in a new blank tab</small></button>
+          <a class="discord-button" href="https://discord.gg/DP2hM7RRhR" target="_blank" rel="noopener">Join Discord</a>
+        </div>
+        <p id="launchStatus" class="launch-status" aria-live="polite"></p>
+      </div>
+      <div class="poster-stack" aria-label="Vice City artwork">
+        <figure class="poster poster-main"><img src="assets/launcher/vice-city-cover.jpg" alt="Grand Theft Auto Vice City artwork"></figure>
+        <figure class="poster poster-small"><img src="assets/launcher/vice-city-intro.jpg" alt="Grand Theft Auto Vice City scene"></figure>
+      </div>
+    </section>
 
-  <main id="loader" role="status" aria-live="polite">
-    <section class="loader-card">
-      <div class="brand-row">
-        <img src="https://cdn.jsdelivr.net/gh/StaticQuasar931/Images@main/icon.png" alt="StaticQuasar931">
-        <div><p class="eyebrow">STATICQUASAR931 GAMES</p><h1>Grand Theft Auto: Vice City</h1></div>
-      </div>
-      <p class="loader-note">The first load is large and can take a while on a Chromebook. Keep this tab open. When the game appears, click inside it a few times to focus the controls.</p>
-      <div class="progress-track"><div id="progressFill"></div></div>
-      <div class="progress-meta"><strong id="progressPercent">0%</strong><span id="progressBytes">Preparing manifest…</span></div>
-      <p id="loadingStage">Checking local cache</p>
-      <p id="loadingAsset">Starting…</p>
-      <div id="errorPanel" hidden>
-        <h2>Loading stopped</h2><p id="errorMessage"></p>
-        <div class="error-actions"><button id="retryButton" type="button">Retry</button><button id="clearCacheButton" type="button">Clear cached game files and reload</button><button id="copyErrorButton" type="button">Copy error details</button></div>
-      </div>
+    <section class="info-grid">
+      <article><strong>First visit</strong><p>The game downloads in verified pieces. Keep the tab open while the neon meter fills.</p></article>
+      <article><strong>Returning visits</strong><p>Verified files stay in your browser, so future launches avoid downloading everything again.</p></article>
+      <article><strong>Chromebook tip</strong><p>Firefox may run the port more smoothly. Click inside the game after it appears to focus controls.</p></article>
     </section>
   </main>
 
-  <div class="wasted-container" hidden></div>
-  <div class="intro-container" hidden><div class="loader-container"><div class="progress-bar-container" id="spinner"><div class="progress-bar-fill"></div></div><div id="status">Downloading…</div><progress id="progress"></progress></div></div>
-  <input type="file" id="original-game-file" hidden>
-  <canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()"></canvas>
-  <div class="touch-controls-wrapper">
-    <div id="move"></div><div id="look"></div><div class="touch-control radio"></div><div class="touch-control weapon"></div><div class="touch-control menu"></div><div class="touch-control fist"></div><div class="touch-control drift"></div><div class="touch-control run"></div><div class="touch-control car getIn"></div><div class="touch-control left"></div><div class="touch-control right"></div><div class="touch-control jump"></div><div class="touch-control car getOut"></div><div class="touch-control camera"></div><div class="touch-control mobile"></div><div class="touch-control job"></div><div class="touch-control horn"></div><div class="touch-control fireRight"></div><div class="touch-control fireLeft"></div>
-  </div>
-  <script src="https://cdn.jsdelivr.net/gh/StaticQuasar931/Vice-City@main/loader.js"></script>
+  <section class="seo-content" aria-label="About Grand Theft Auto Vice City Unblocked">
+    <h2>Grand Theft Auto: Vice City Unblocked</h2>
+    <p>Play Grand Theft Auto Vice City unblocked for school, work, and home. This Chromebook-friendly browser port supports common searches including GTA Vice City unblocked, vicecity, vice cty, and Grand Theft Auto Vice City game. StaticQuasar931 games are available from the Static game collection.</p>
+    <a href="https://sites.google.com/view/staticquasar931/gm3z/genres">Browse more game genres</a>
+  </section>
+
+  <script src="launcher.js"></script>
 </body>
 </html>
