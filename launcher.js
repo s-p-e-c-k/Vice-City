@@ -15,7 +15,7 @@
     gameWindow.document.close();
     button.disabled=true; status.textContent='Building the clean game tab…';
     try {
-      const response=await fetch(new URL('game.html?build=20260710-5',CDN),{cache:'no-store'});
+      const response=await fetch(new URL('game.html?build=20260712-6',CDN),{cache:'no-store'});
       if(!response.ok) throw new Error(`Game page returned HTTP ${response.status}`);
       const html=await response.text();
       if(!html.toLowerCase().includes('<!doctype html')) throw new Error('The CDN returned an invalid game page.');

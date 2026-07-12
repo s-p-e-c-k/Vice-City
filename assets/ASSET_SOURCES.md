@@ -6,5 +6,6 @@
 - `launcher/static-icon.png`: supplied Google Drive image `1XBUaPAIDuwV9Ln2Wqx0lztG4QO_dyjhp`.
 - `launcher/google-form.png`, `launcher/discord.png`, and `launcher/instagram.png`: downloaded from the StaticQuasar931 Images repository using the filenames supplied in the original launcher.
 - `loading/welcome-back.jpg`: “Rockstar Games Welcome Back To Vice City” fan loading-screen concept from https://www.gtavice.net/images/rockstar-welcome-back-to-vice-city-fan-art
+- `loading/vice-city-definitive-3.jpg`, `vice-city-definitive-6.jpg`, and `vice-city-definitive-7.jpg`: 1920×1080 official Vice City screenshots downloaded from the iGrandTheftAuto Vice City image gallery.
 
 Artwork and trademarks remain the property of their respective owners.

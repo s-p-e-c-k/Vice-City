@@ -6,3 +6,4 @@
 .slide-rail i{display:block;width:4px;height:28px;border-radius:9px;background:rgba(255,255,255,.25);transition:height .3s,background .3s}
 .slide-rail i.active{height:52px;background:#ff4fa3;box-shadow:0 0 16px rgba(255,79,163,.7)}
 .trivia-score{display:flex;justify-content:space-between;margin-top:18px;padding-top:13px;border-top:1px solid rgba(255,255,255,.1);color:#cbbdd4}.trivia-score strong{color:#4fe6ff;font-size:20px}
+#neonRun{position:relative;z-index:2;pointer-events:auto}.mini-head{display:flex;align-items:center;justify-content:space-between}.mini-head h2{margin:0}.mini-head strong{color:#ffe66d;font-size:24px}#runnerCanvas{position:relative;z-index:3;display:block;width:100%;height:auto;margin:12px 0;border:1px solid rgba(79,230,255,.28);border-radius:16px;background:#100521;touch-action:none;pointer-events:auto}.runner-help{margin:0;color:#cbbdd4;font-size:12px;line-height:1.4}

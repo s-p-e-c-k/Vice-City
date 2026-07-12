@@ -2,7 +2,7 @@
   'use strict';
 
   const REPO_BASE = 'https://cdn.jsdelivr.net/gh/StaticQuasar931/Vice-City@main/';
-  const CACHE_NAME = 'vice-city-staticquasar931-v5';
+  const CACHE_NAME = 'vice-city-staticquasar931-v6';
   const DB_NAME = CACHE_NAME;
   const STORE_NAME = 'files';
   const MANIFEST = [
@@ -83,9 +83,15 @@
     pathname = decodeURIComponent(pathname).replace(/^\/+/, '').toLowerCase();
     for (const key of blobUrls.keys()) if (pathname === key || pathname.endsWith(`/${key}`)) return key; return null;
   }
+  function mapAssetUrl(input) {
+    const raw=input instanceof Request?input.url:input instanceof URL?input.href:String(input);
+    const key=knownAssetPath(input); if(key) return blobUrls.get(key);
+    try { const url=new URL(raw,location.href); if(url.hostname.toLowerCase()==='cdn.dos.zone'&&url.pathname.toLowerCase().startsWith('/vcsky/fetched/')) { const path=decodeURIComponent(url.pathname.slice('/vcsky/fetched/'.length)); return new URL(path,REPO_BASE).href+url.search; } } catch (_) {}
+    return null;
+  }
   function installRemapping() {
-    const nativeFetch=window.fetch.bind(window); window.fetch=(input,init)=>{ const key=knownAssetPath(input); if(!key) return nativeFetch(input,init); const mapped=blobUrls.get(key); if(input instanceof Request) return nativeFetch(new Request(mapped,input),init); return nativeFetch(mapped,init); };
-    const nativeOpen=XMLHttpRequest.prototype.open; XMLHttpRequest.prototype.open=function(method,url,...rest){const key=knownAssetPath(url);return nativeOpen.call(this,method,key?blobUrls.get(key):url,...rest);};
+    const nativeFetch=window.fetch.bind(window); window.fetch=async(input,init)=>{const mapped=mapAssetUrl(input);if(!mapped)return nativeFetch(input,init);const method=(init?.method||(input instanceof Request?input.method:'GET')).toUpperCase();const headers=init?.headers||(input instanceof Request?input.headers:undefined);const options={...init,method,headers};if(method!=='GET'||mapped.startsWith('blob:'))return nativeFetch(mapped,options);const range=headers instanceof Headers?headers.get('range'):null;if(range)return nativeFetch(mapped,options);const runtimeCache=await caches.open(`${CACHE_NAME}-runtime`);const hit=await runtimeCache.match(mapped);if(hit)return hit.clone();const response=await nativeFetch(mapped,options);if(response.ok)await runtimeCache.put(mapped,response.clone());return response;};
+    const nativeOpen=XMLHttpRequest.prototype.open; XMLHttpRequest.prototype.open=function(method,url,...rest){const mapped=mapAssetUrl(url);return nativeOpen.call(this,method,mapped||url,...rest);};
   }
   async function loadScript(path) {
     ui.asset.textContent=path;
@@ -102,15 +108,10 @@
     URL.revokeObjectURL(objectUrl);
   }
   window.__loadVerifiedViceCityScript=loadScript;
-  async function clearCache() { for(const url of blobUrls.values()) URL.revokeObjectURL(url); blobUrls.clear(); await caches.delete(`${CACHE_NAME}-core`); await new Promise(resolve=>{const req=indexedDB.deleteDatabase(DB_NAME);req.onsuccess=req.onerror=req.onblocked=resolve;}); }
+  async function cleanupOldBuildCaches(){const keep=new Set([`${CACHE_NAME}-core`,`${CACHE_NAME}-runtime`]);const cacheKeys=await caches.keys();await Promise.all(cacheKeys.filter(key=>key.startsWith('vice-city-staticquasar931-v')&&!keep.has(key)).map(key=>caches.delete(key)));if(indexedDB.databases){const databases=await indexedDB.databases();await Promise.all(databases.filter(db=>db.name&&db.name.startsWith('vice-city-staticquasar931-v')&&db.name!==DB_NAME).map(db=>new Promise(resolve=>{const request=indexedDB.deleteDatabase(db.name);request.onsuccess=request.onerror=request.onblocked=resolve;})));}}
+  async function clearCache() { for(const url of blobUrls.values()) URL.revokeObjectURL(url); blobUrls.clear(); await caches.delete(`${CACHE_NAME}-core`); await caches.delete(`${CACHE_NAME}-runtime`); await new Promise(resolve=>{const req=indexedDB.deleteDatabase(DB_NAME);req.onsuccess=req.onerror=req.onblocked=resolve;}); }
   function showError(error) { currentError=`${error?.stack || error}`; console.error('[Vice City loader]',error); ui.panel.hidden=false; ui.message.textContent=error?.message||String(error); ui.stage.textContent='Load failed'; }
-  function verifyWebGL() {
-    const probe=document.createElement('canvas');
-    const gl=probe.getContext('webgl2',{alpha:false,depth:true,stencil:true,antialias:true})||probe.getContext('webgl',{alpha:false,depth:true,stencil:true,antialias:true});
-    if(!gl) throw new Error('WebGL is unavailable. Enable hardware acceleration or try Firefox, then reload.');
-    const extension=gl.getExtension('WEBGL_lose_context'); if(extension) extension.loseContext();
-  }
-  async function start() { try { ui.panel.hidden=true; completedBytes=0; updateProgress(); verifyWebGL(); for(const [path,sizes] of MANIFEST) await mergeAsset(path,sizes); ui.asset.textContent='index.wasm'; const wasm=await fetchPart('index.wasm',WASM_SIZE); blobUrls.set('index.wasm',URL.createObjectURL(new Blob([wasm],{type:'application/wasm'}))); installRemapping(); ui.stage.textContent='Initializing game engine'; for(const script of SCRIPT_ORDER) await loadScript(script); ui.stage.textContent='Ready for your arrival'; ui.asset.textContent='Click Enter Vice City to create the graphics and audio context.'; ui.play.hidden=false; } catch(error){showError(error);} }
+  async function start() { try { ui.panel.hidden=true; completedBytes=0; updateProgress(); ui.stage.textContent='Updating browser cache'; await cleanupOldBuildCaches(); for(const [path,sizes] of MANIFEST) await mergeAsset(path,sizes); ui.asset.textContent='index.wasm'; const wasm=await fetchPart('index.wasm',WASM_SIZE); blobUrls.set('index.wasm',URL.createObjectURL(new Blob([wasm],{type:'application/wasm'}))); installRemapping(); ui.stage.textContent='Initializing game engine'; for(const script of SCRIPT_ORDER) await loadScript(script); ui.stage.textContent='Ready for your arrival'; ui.asset.textContent='Click Enter Vice City to create the graphics and audio context.'; ui.play.hidden=false; } catch(error){showError(error);} }
 
   document.querySelector('#retryButton').onclick=()=>location.reload();
   document.querySelector('#clearCacheButton').onclick=async()=>{await clearCache();location.reload();};
@@ -132,6 +133,7 @@
   ]; let questionIndex=0,score=0;
   function showQuestion(){const item=questions[questionIndex%questions.length];document.querySelector('#triviaQuestion').textContent=item.q;document.querySelector('#triviaResult').textContent='';const box=document.querySelector('#triviaAnswers');box.innerHTML='';item.a.forEach((answer,index)=>{const button=document.createElement('button');button.textContent=answer;button.onclick=()=>{[...box.children].forEach(child=>child.disabled=true);const correct=index===item.c;button.classList.add(correct?'correct':'wrong');box.children[item.c].classList.add('correct');if(correct){score++;document.querySelector('#triviaScore').textContent=score;}document.querySelector('#triviaResult').textContent=(correct?'Correct. ':'Not quite. ')+item.f;setTimeout(()=>{questionIndex++;showQuestion();},2600);};box.appendChild(button);});} showQuestion();
   const slides=[...document.querySelectorAll('.load-slide')],rails=[...document.querySelectorAll('.slide-rail i')];let slideIndex=0;setInterval(()=>{slides[slideIndex].classList.remove('active');rails[slideIndex].classList.remove('active');slideIndex=(slideIndex+1)%slides.length;slides[slideIndex].classList.add('active');rails[slideIndex].classList.add('active');},7200);
+  (()=>{const canvas=document.querySelector('#runnerCanvas');if(!canvas)return;const ctx=canvas.getContext('2d');const lanes=[95,210,325];let lane=1,runnerScore=0,lastSpawn=0,lastTime=performance.now(),objects=[];function move(direction){lane=Math.max(0,Math.min(2,lane+direction));}addEventListener('keydown',event=>{if(event.key==='ArrowLeft'||event.key.toLowerCase()==='a')move(-1);if(event.key==='ArrowRight'||event.key.toLowerCase()==='d')move(1);});canvas.addEventListener('pointerdown',event=>{const rect=canvas.getBoundingClientRect();lane=Math.max(0,Math.min(2,Math.floor((event.clientX-rect.left)/(rect.width/3))));});function spawn(now){if(now-lastSpawn>650){objects.push({lane:Math.floor(Math.random()*3),y:-25,type:Math.random()<.72?'tape':'police',speed:115+Math.random()*65});lastSpawn=now;}}function rounded(x,y,w,h,r){ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fill();}function draw(now){const dt=Math.min(.04,(now-lastTime)/1000);lastTime=now;spawn(now);ctx.clearRect(0,0,420,310);const gradient=ctx.createLinearGradient(0,0,0,310);gradient.addColorStop(0,'#32105b');gradient.addColorStop(1,'#090316');ctx.fillStyle=gradient;ctx.fillRect(0,0,420,310);ctx.strokeStyle='rgba(79,230,255,.28)';ctx.setLineDash([14,16]);ctx.lineWidth=2;[140,280].forEach(x=>{ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,310);ctx.stroke();});ctx.setLineDash([]);objects.forEach(object=>object.y+=object.speed*dt);objects=objects.filter(object=>{if(object.y>245&&object.y<300&&object.lane===lane){if(object.type==='tape'){runnerScore++;document.querySelector('#runnerScore').textContent=runnerScore;}else{runnerScore=Math.max(0,runnerScore-2);document.querySelector('#runnerScore').textContent=runnerScore;}return false;}return object.y<335;});objects.forEach(object=>{const x=lanes[object.lane];if(object.type==='tape'){ctx.fillStyle='#ffe66d';ctx.fillRect(x-18,object.y-11,36,22);ctx.fillStyle='#17071f';ctx.fillRect(x-10,object.y-5,20,10);ctx.fillStyle='#ff4fa3';ctx.beginPath();ctx.arc(x-7,object.y,3,0,Math.PI*2);ctx.arc(x+7,object.y,3,0,Math.PI*2);ctx.fill();}else{ctx.fillStyle='#5865f2';ctx.beginPath();ctx.arc(x,object.y,17,0,Math.PI*2);ctx.fill();ctx.fillStyle='#ff4fa3';ctx.fillRect(x-17,object.y-4,34,8);}});const carX=lanes[lane];ctx.fillStyle='#4fe6ff';rounded(carX-24,260,48,34,9);ctx.fillStyle='#ff4fa3';rounded(carX-17,252,34,18,7);ctx.fillStyle='#ffe66d';ctx.fillRect(carX-18,285,8,5);ctx.fillRect(carX+10,285,8,5);if(document.body.contains(canvas))requestAnimationFrame(draw);}requestAnimationFrame(draw);})();
   let sequence=''; addEventListener('keydown',event=>{sequence=(sequence+event.key.toLowerCase()).slice(-3);if(sequence==='yui'){document.querySelector('#staticMenu').classList.toggle('menu-hidden');document.querySelector('#staticSlideMenu').classList.toggle('menu-hidden');sequence='';}});
   addEventListener('beforeunload',()=>{for(const url of blobUrls.values()) URL.revokeObjectURL(url);});
   start();

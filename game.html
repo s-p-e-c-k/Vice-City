@@ -6,10 +6,10 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
   <meta name="theme-color" content="#090316">
   <title>Grand Theft Auto: Vice City | StaticQuasar931</title>
-  <link rel="icon" type="image/png" href="assets/launcher/static-icon.png?build=20260710-5">
-  <link rel="stylesheet" href="style.css?build=20260710-5">
-  <link rel="stylesheet" href="game-shell.css?build=20260710-5">
-  <link rel="stylesheet" href="loading-slides.css?build=20260710-5">
+  <link rel="icon" type="image/png" href="assets/launcher/static-icon.png?build=20260712-6">
+  <link rel="stylesheet" href="style.css?build=20260712-6">
+  <link rel="stylesheet" href="game-shell.css?build=20260712-6">
+  <link rel="stylesheet" href="loading-slides.css?build=20260712-6">
 </head>
 <body data-is-touch="0" data-state-car="0" data-state-car-gun="0" data-state-gun="0" data-state-bike="0" data-state-menu="1" data-state-cutscene="0" data-state-mobring="0" data-state-job="0" data-state-disable-controls="0" data-state-panzer="0" data-state-car-with-weapon="0" data-state-hunter="0" data-state-scope-mode="0" data-state-scope-gun="0">
   <div id="gameBackdrop" aria-hidden="true">
@@ -17,8 +17,11 @@
     <img class="load-slide" src="assets/launcher/vice-city-cover.jpg" alt="">
     <img class="load-slide" src="assets/launcher/vice-city-intro.jpg" alt="">
     <img class="load-slide" src="assets/loading/welcome-back.jpg" alt="">
+    <img class="load-slide" src="assets/loading/vice-city-definitive-3.jpg" alt="">
+    <img class="load-slide" src="assets/loading/vice-city-definitive-6.jpg" alt="">
+    <img class="load-slide" src="assets/loading/vice-city-definitive-7.jpg" alt="">
     <div class="load-shade"></div>
-    <div class="slide-rail"><i class="active"></i><i></i><i></i><i></i></div>
+    <div class="slide-rail"><i class="active"></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
   </div>
   <aside id="staticMenu"><a href="https://sites.google.com/view/staticquasar931/gm3z" target="_blank" rel="noopener">More Unblocked Games by Static</a><button id="closeStaticMenu" type="button" aria-label="Hide menu">×</button></aside>
   <aside id="staticSlideMenu"><a id="staticSlideLink" target="_blank" rel="noopener"><img id="staticSlideImg" alt=""></a></aside>
@@ -34,8 +37,9 @@
       <div id="errorPanel" hidden><h2>Loading stopped</h2><p id="errorMessage"></p><div class="error-actions"><button id="retryButton" type="button">Retry</button><button id="clearCacheButton" type="button">Clear cached files</button><button id="copyErrorButton" type="button">Copy error details</button></div></div>
     </section>
     <aside class="activity-card">
-      <div class="activity-tabs"><button class="active" data-panel="trivia">Trivia</button><button data-panel="tips">Controls</button></div>
-      <section id="trivia" class="activity-panel active"><p class="activity-label">VICE CITY TRIVIA</p><h2 id="triviaQuestion">Loading question…</h2><div id="triviaAnswers"></div><p id="triviaResult"></p><div class="trivia-score"><span>Street cred</span><strong id="triviaScore">0</strong></div></section>
+      <div class="activity-tabs"><button class="active" data-panel="neonRun">Neon Run</button><button data-panel="trivia">Trivia</button><button data-panel="tips">Controls</button></div>
+      <section id="neonRun" class="activity-panel active"><p class="activity-label">LOADING MINI GAME</p><div class="mini-head"><h2>Neon Run</h2><strong id="runnerScore">0</strong></div><canvas id="runnerCanvas" width="420" height="310" aria-label="Neon Run mini game"></canvas><p class="runner-help">Use ← →, A D, or tap a lane. Collect cassettes and dodge police lights.</p></section>
+      <section id="trivia" class="activity-panel"><p class="activity-label">VICE CITY TRIVIA</p><h2 id="triviaQuestion">Loading question…</h2><div id="triviaAnswers"></div><p id="triviaResult"></p><div class="trivia-score"><span>Street cred</span><strong id="triviaScore">0</strong></div></section>
       <section id="tips" class="activity-panel"><p class="activity-label">QUICK CONTROLS</p><ul><li><kbd>W A S D</kbd><span>Move</span></li><li><kbd>Mouse</kbd><span>Look and aim</span></li><li><kbd>Enter</kbd><span>Enter vehicles</span></li><li><kbd>Esc</kbd><span>Pause menu</span></li></ul><p>When the game appears, click inside it a few times to focus keyboard and audio.</p></section>
     </aside>
   </main>
@@ -45,6 +49,6 @@
   <input type="file" id="original-game-file" hidden>
   <canvas class="emscripten" id="canvas" width="1280" height="720" oncontextmenu="event.preventDefault()"></canvas>
   <div class="touch-controls-wrapper"><div id="move"></div><div id="look"></div><div class="touch-control radio"></div><div class="touch-control weapon"></div><div class="touch-control menu"></div><div class="touch-control fist"></div><div class="touch-control drift"></div><div class="touch-control run"></div><div class="touch-control car getIn"></div><div class="touch-control left"></div><div class="touch-control right"></div><div class="touch-control jump"></div><div class="touch-control car getOut"></div><div class="touch-control camera"></div><div class="touch-control mobile"></div><div class="touch-control job"></div><div class="touch-control horn"></div><div class="touch-control fireRight"></div><div class="touch-control fireLeft"></div></div>
-  <script src="loader.js?build=20260710-5"></script>
+  <script src="loader.js?build=20260712-6"></script>
 </body>
 </html>
